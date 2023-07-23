@@ -15,7 +15,8 @@ func NewEventDispatcher() *EventDispatcher {
 }
 
 func (ed *EventDispatcher) Register(eventName string, handler EventHandlerInterface) error {
-	// Check if the handler is already registered for the event
+	// Check if the event name is already registered and
+	// Check if the handler is already registered for that event
 	if _, ok := ed.handlers[eventName]; ok {
 		for _, h := range ed.handlers[eventName] {
 			if h == handler {
