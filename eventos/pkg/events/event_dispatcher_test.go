@@ -1,7 +1,6 @@
 package events
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -74,7 +73,6 @@ func (suite *EventDispatcherTestSuite) TestEventDispatcher_Register() {
 
 	assert.Equal(suite.T(), suite.handler, suite.dispatcher.handlers[suite.event.GetName()][0])
 	assert.Equal(suite.T(), suite.handler2, suite.dispatcher.handlers[suite.event.GetName()][1])
-	fmt.Println(suite.dispatcher.handlers[suite.event.GetName()][0])
 }
 
 func (suite *EventDispatcherTestSuite) TestEventDispatcher_Register_WithSameHandler() {
@@ -136,4 +134,30 @@ func (suite *EventDispatcherTestSuite) TestEventDispatcher_Dispatch() {
 	suite.Nil(err)
 	eh.AssertExpectations(suite.T())
 	eh.AssertNumberOfCalls(suite.T(), "Handle", 1)
+}
+
+func (suite *EventDispatcherTestSuite) TestEventDispatcher_Remove() {
+	err := suite.dispatcher.Register(suite.event.GetName(), suite.handler)
+	suite.Nil(err)
+	suite.Equal(1, len(suite.dispatcher.handlers[suite.event.GetName()]))
+
+	err = suite.dispatcher.Register(suite.event.GetName(), suite.handler2)
+	suite.Nil(err)
+	suite.Equal(2, len(suite.dispatcher.handlers[suite.event.GetName()]))
+
+	err = suite.dispatcher.Register(suite.event2.GetName(), suite.handler3)
+	suite.Nil(err)
+	suite.Equal(1, len(suite.dispatcher.handlers[suite.event2.GetName()]))
+
+	err = suite.dispatcher.Remove(suite.event.GetName(), suite.handler)
+	suite.Nil(err)
+	assert.Equal(suite.T(), 1, len(suite.dispatcher.handlers[suite.event.GetName()]))
+
+	err = suite.dispatcher.Remove(suite.event.GetName(), suite.handler2)
+	suite.Nil(err)
+	assert.Equal(suite.T(), 0, len(suite.dispatcher.handlers[suite.event.GetName()]))
+
+	err = suite.dispatcher.Remove(suite.event2.GetName(), suite.handler3)
+	suite.Nil(err)
+	assert.Equal(suite.T(), 0, len(suite.dispatcher.handlers[suite.event2.GetName()]))
 }
