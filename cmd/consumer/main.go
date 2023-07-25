@@ -16,11 +16,12 @@ func main() {
 	defer ch.Close()
 	// Cria um canal go para receber as mensagens
 	msgs := make(chan amqp.Delivery)
-	// Inicia o consumo das mensagens em uma goroutine
+	// Inicia o consumo das mensagens enviadas para o canal go em uma goroutine
 	go rabbitmq.Consume(ch, msgs)
 	// Loop infinito para receber as mensagens e printar no console
 	for msg := range msgs {
 		fmt.Println(string(msg.Body))
+		// Confirma o recebimento da mensagem para não colocar na fila novamente
 		msg.Ack(false)
 	}
 }
