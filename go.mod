@@ -2,7 +2,10 @@ module github.com/gsouza97/go-expert-utils
 
 go 1.20
 
-require github.com/stretchr/testify v1.8.4
+require (
+	github.com/rabbitmq/amqp091-go v1.8.1
+	github.com/stretchr/testify v1.8.4
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
