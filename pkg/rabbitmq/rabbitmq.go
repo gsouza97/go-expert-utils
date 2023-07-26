@@ -1,6 +1,10 @@
 package rabbitmq
 
-import amqp "github.com/rabbitmq/amqp091-go"
+import (
+	"context"
+
+	amqp "github.com/rabbitmq/amqp091-go"
+)
 
 // Função que cria uma conexão com o RabbitMQ,
 // criando também um canal para trabalhar com essa conexão
@@ -16,15 +20,27 @@ func OpenChannel() (*amqp.Channel, error) {
 	return ch, err
 }
 
-func Consume(ch *amqp.Channel, msgsOut chan<- amqp.Delivery) error {
+func Consume(ch *amqp.Channel, msgsOut chan<- amqp.Delivery, queue string) error {
 	// A função consume fica fazendo um pooling na fila do RabbitMQ pegando as informações
-	msgs, err := ch.Consume("minha-fila", "go-consumer", false, false, false, false, nil)
+	msgs, err := ch.Consume(queue, "go-consumer", false, false, false, false, nil)
 	if err != nil {
 		return err
 	}
 	// Começar a consumir as mensagens e jogar para o canal go
 	for msg := range msgs {
 		msgsOut <- msg
+	}
+	return nil
+}
+
+func Publish(ch *amqp.Channel, body string, exchange string) error {
+	ctx := context.Background()
+	err := ch.PublishWithContext(ctx, exchange, "", false, false, amqp.Publishing{
+		ContentType: "text/plain",
+		Body:        []byte(body),
+	})
+	if err != nil {
+		return err
 	}
 	return nil
 }
